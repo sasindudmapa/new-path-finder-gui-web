@@ -1,0 +1,13 @@
+#map{
+    position: relative;
+    height: 100vh;
+    width: 100vw;
+}
+
+#node{
+    background-color: rgb(58, 164, 136);
+    height: 5vh;
+    width: 5vh;
+    border-radius: 50%;
+    position: absolute;
+}
