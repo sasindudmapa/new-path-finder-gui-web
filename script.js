@@ -1,4 +1,53 @@
 let map_nodes = [
+    [
+        1,
+        [
+            344,
+            222
+        ],
+        [
+            [
+                "2",
+                207.8677464158401
+            ]
+        ],
+        true
+    ],
+    [
+        2,
+        [
+            539,
+            150
+        ],
+        [
+            [
+                "1",
+                207.8677464158401
+            ],
+            [
+                "3",
+                137.84411485442533
+            ]
+        ],
+        true
+    ],
+    [
+        3,
+        [
+            654,
+            226
+        ],
+        [
+            [
+                "2",
+                137.84411485442533
+            ]
+        ],
+        false
+    ]
+]
+
+let map_wnodes = [
     // Urban Center
     [1, [100, 150], [[2, 50], [3, 70], [4, 80]], false],
     [2, [150, 170], [[1, 50], [3, 60]], false],
@@ -30,17 +79,7 @@ let map_nodes = [
     [20, [670, 620], [[18, 110], [19, 100]], false],
 ]
 
-const mapCanvas = document.getElementById("map")
 
-map_nodes.map((node)=>{
-    const newNode = document.createElement("div")
-    newNode.style.left = `${node[1][0]}px`
-    newNode.style.top = `${node[1][1]}px`
-    newNode.id = "node"
-    console.log(newNode)
-
-    mapCanvas.appendChild(newNode)
-})
 
 
 
@@ -159,4 +198,5 @@ function pathFinder(start, goal, map_nodes) {
 
 // Example usage:
 // Assume map_nodes is defined elsewhere
+console.log(map_nodes)
 pathFinder(19, 2, map_nodes);

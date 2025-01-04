@@ -1,74 +1,78 @@
-let map_nodes = []
-let noOfNodes = 0
+let map_nodes = []; // Stores information about all nodes
+let noOfNodes = 0; // Tracks the number of nodes
 
-const mapCanvas = document.getElementById("mapCanvas")
-const edgeCanvas = document.getElementById("edgeCanvas");
+const mapCanvas = document.getElementById("mapCanvas"); // Canvas for creating nodes
+const edgeCanvas = document.getElementById("edgeCanvas"); // Canvas for drawing edges
 
-let cursorX;
-let cursorY; 
+let cursorX; // Tracks the X-coordinate of the mouse relative to the canvas
+let cursorY; // Tracks the Y-coordinate of the mouse relative to the canvas
 
-let nodeSize = 20;
+let nodeSize = 20; // Size of each node
 
-let nodeCreateState = true
-let drawingEdge = false
-let drawingEdgeStartCords = []
-let drawingEdgeEndCords = []
-let drawingEdgeStartNode = null
-let drawingEdgeEndNode = null
-let currentHoveringNode = null
+let nodeCreateState = true; // Determines whether the system is in node creation mode
+let drawingEdge = false; // Tracks whether an edge is being drawn
+let drawingEdgeStartCords = []; // Starting coordinates of the edge
+let drawingEdgeEndCords = []; // Ending coordinates of the edge
+let drawingEdgeStartNode = null; // Start node for the edge
+let drawingEdgeEndNode = null; // End node for the edge
+let currentHoveringNode = null; // Currently hovered node
 
-//track mouse coordinates relative to the canvas
+// Track mouse coordinates relative to the canvas
 mapCanvas.addEventListener("mousemove", (e) => {
     cursorX = e.pageX - mapCanvas.offsetLeft;
     cursorY = e.pageY - mapCanvas.offsetTop;
 });
 
+// Create a new node when the canvas is clicked
+mapCanvas.addEventListener("click", createNewNode);
 
+function createNewNode() {
+    // Create a new node element
+    const newNode = document.createElement("div");
+    let newNodePosX = cursorX - nodeSize / 4;
+    let newNodePosY = cursorY - nodeSize / 4;
 
-mapCanvas.addEventListener("click", createNewNode)
+    noOfNodes++;
+    let newNodeData = [noOfNodes, [newNodePosX, newNodePosY], [], false]; // Node data: [ID, position, edges, visited flag]
+    map_nodes.push(newNodeData);
 
-function createNewNode(){
-    console.log("new node created")
-    const newNode = document.createElement("div")
-    let newNodePosX = cursorX - nodeSize/4
-    let newNodePosY = cursorY - nodeSize/4
+    // Add the new node to the canvas
+    newNode.style.left = `${newNodePosX}px`;
+    newNode.style.top = `${newNodePosY}px`;
+    newNode.classList.add("node");
+    newNode.id = `${noOfNodes}`;
+    mapCanvas.appendChild(newNode);
 
-    noOfNodes++
-    let newNodeData = [noOfNodes, [newNodePosX, newNodePosY], [], false]
-    map_nodes.push(newNodeData)
+    // Track the currently hovered node
+    newNode.addEventListener("mouseover", () => {
+        currentHoveringNode = newNode.id;
+    });
 
-    //add the node to the canvas
-    newNode.style.left = `${newNodePosX}px`
-    newNode.style.top = `${newNodePosY}px`
-    newNode.classList.add("node")
-    newNode.id = `${noOfNodes}`
-    mapCanvas.appendChild(newNode)
-
-    //hold the node that's being hovered
-    newNode.addEventListener("mouseover", (e)=>{
-        currentHoveringNode = newNode.id
-    })
-
-    newNode.addEventListener("click", (e)=>{
-        !nodeCreateState && createNewEdge(e.target.id, e.target.getBoundingClientRect())
-    })
+    // Handle node click for edge creation
+    newNode.addEventListener("click", (e) => {
+        if (!nodeCreateState) {
+            createNewEdge(e.target.id, e.target.getBoundingClientRect());
+        }
+    });
 }
 
+function createNewEdge(nodeId, nodePos) {
+    if (drawingEdge) {
+        // Set the end coordinates and node for the edge
+        drawingEdgeEndCords = [nodePos.x, nodePos.y];
+        drawingEdgeEndNode = nodeId;
 
-function createNewEdge(nodeId, nodePos){
-    if(drawingEdge){
-        drawingEdgeEndCords = [nodePos.x, nodePos.y]
-        drawingEdgeEndNode = nodeId
-
+        // Calculate the distance between the start and end nodes
         let d = Math.sqrt(
-            Math.pow(drawingEdgeStartCords[0] - drawingEdgeEndCords[0], 2) + Math.pow(drawingEdgeStartCords[1] - drawingEdgeEndCords[1], 2)
-          );
+            Math.pow(drawingEdgeStartCords[0] - drawingEdgeEndCords[0], 2) +
+            Math.pow(drawingEdgeStartCords[1] - drawingEdgeEndCords[1], 2)
+        );
 
-        map_nodes[drawingEdgeStartNode-1][2].push([drawingEdgeEndNode, d])
-        map_nodes[drawingEdgeEndNode-1][2].push([drawingEdgeStartNode, d])
-        console.log(map_nodes)
-        //draw the edge
-        console.log("edge pos are ", drawingEdgeStartCords, drawingEdgeEndCords)
+        // Update node adjacency lists with the edge and its length
+        map_nodes[drawingEdgeStartNode - 1][2].push([parseInt(drawingEdgeEndNode, 10), d]);
+        map_nodes[drawingEdgeEndNode - 1][2].push([parseInt(drawingEdgeStartNode, 10), d]);
+
+        // Draw the edge on the edge canvas
         const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
         line.setAttribute("x1", drawingEdgeStartCords[0]);
         line.setAttribute("y1", drawingEdgeStartCords[1]);
@@ -77,28 +81,31 @@ function createNewEdge(nodeId, nodePos){
         line.setAttribute("stroke", "black");
         line.setAttribute("stroke-width", "2");
         edgeCanvas.appendChild(line);
-    }else{
-        drawingEdgeStartCords = [nodePos.x, nodePos.y]
-        drawingEdgeStartNode = nodeId
+    } else {
+        // Set the start coordinates and node for the edge
+        drawingEdgeStartCords = [nodePos.x, nodePos.y];
+        drawingEdgeStartNode = nodeId;
     }
-    
-    drawingEdge = !drawingEdge
+
+    // Toggle the edge drawing state
+    drawingEdge = !drawingEdge;
 }
 
+// Toggle between node creation and edge creation modes using the 'e' key
 document.addEventListener("keydown", (e) => {
-    if(e.key == "e"){
-        if(nodeCreateState){
-            //remove create node listener
-            mapCanvas.removeEventListener("click", createNewNode)
-        }else{
-            //remove create edge listener
-            mapCanvas.removeEventListener("click", createNewEdge)
-            //add create node listener
-            mapCanvas.addEventListener("click", createNewNode)
+    if (e.key === "e") {
+        if (nodeCreateState) {
+            // Remove node creation event listener
+            mapCanvas.removeEventListener("click", createNewNode);
+        } else {
+            // Add node creation event listener and remove edge creation
+            mapCanvas.removeEventListener("click", createNewEdge);
+            mapCanvas.addEventListener("click", createNewNode);
         }
-        nodeCreateState = !nodeCreateState
+        nodeCreateState = !nodeCreateState;
     }
 });
+
 
 
 
@@ -212,3 +219,12 @@ function pathFinder(start, goal, map_nodes) {
 
     console.log(foundPath);
 }
+
+
+document.addEventListener("keydown", (e)=>{
+
+    if(e.key == "s"){ 
+        console.log(map_nodes)
+        pathFinder(1, 15, map_nodes)
+    }
+})
