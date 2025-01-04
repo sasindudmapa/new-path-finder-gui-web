@@ -1,17 +1,26 @@
 let map_nodes = []
+let noOfNodes = 0
 
-const mapCanvas = document.getElementById("map")
+const mapCanvas = document.getElementById("mapCanvas")
+const edgeCanvas = document.getElementById("edgeCanvas");
 
 let cursorX;
 let cursorY; 
 
-let nodeSize = window.innerHeight * 0.1;
+let nodeSize = 20;
 
 let nodeCreateState = true
+let drawingEdge = false
+let drawingEdgeStartCords = []
+let drawingEdgeEndCords = []
+let drawingEdgeStartNode = null
+let drawingEdgeEndNode = null
+let currentHoveringNode = null
 
+//track mouse coordinates relative to the canvas
 mapCanvas.addEventListener("mousemove", (e) => {
-  cursorX = e.pageX;
-  cursorY = e.pageY;
+    cursorX = e.pageX - mapCanvas.offsetLeft;
+    cursorY = e.pageY - mapCanvas.offsetTop;
 });
 
 
@@ -19,18 +28,61 @@ mapCanvas.addEventListener("mousemove", (e) => {
 mapCanvas.addEventListener("click", createNewNode)
 
 function createNewNode(){
+    console.log("new node created")
     const newNode = document.createElement("div")
-    newNode.style.left = `${cursorX - nodeSize/4}px`
-    newNode.style.top = `${cursorY - nodeSize/4}px`
-    newNode.id = "node"
-    console.log(newNode)
+    let newNodePosX = cursorX - nodeSize/4
+    let newNodePosY = cursorY - nodeSize/4
 
+    noOfNodes++
+    let newNodeData = [noOfNodes, [newNodePosX, newNodePosY], [], false]
+    map_nodes.push(newNodeData)
+
+    //add the node to the canvas
+    newNode.style.left = `${newNodePosX}px`
+    newNode.style.top = `${newNodePosY}px`
+    newNode.classList.add("node")
+    newNode.id = `${noOfNodes}`
     mapCanvas.appendChild(newNode)
+
+    //hold the node that's being hovered
+    newNode.addEventListener("mouseover", (e)=>{
+        currentHoveringNode = newNode.id
+    })
+
+    newNode.addEventListener("click", (e)=>{
+        !nodeCreateState && createNewEdge(e.target.id, e.target.getBoundingClientRect())
+    })
 }
 
 
-function createNewEdge(){
-    console.log("creating new edge")
+function createNewEdge(nodeId, nodePos){
+    if(drawingEdge){
+        drawingEdgeEndCords = [nodePos.x, nodePos.y]
+        drawingEdgeEndNode = nodeId
+
+        let d = Math.sqrt(
+            Math.pow(drawingEdgeStartCords[0] - drawingEdgeEndCords[0], 2) + Math.pow(drawingEdgeStartCords[1] - drawingEdgeEndCords[1], 2)
+          );
+
+        map_nodes[drawingEdgeStartNode-1][2].push([drawingEdgeEndNode, d])
+        map_nodes[drawingEdgeEndNode-1][2].push([drawingEdgeStartNode, d])
+        console.log(map_nodes)
+        //draw the edge
+        console.log("edge pos are ", drawingEdgeStartCords, drawingEdgeEndCords)
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", drawingEdgeStartCords[0]);
+        line.setAttribute("y1", drawingEdgeStartCords[1]);
+        line.setAttribute("x2", drawingEdgeEndCords[0]);
+        line.setAttribute("y2", drawingEdgeEndCords[1]);
+        line.setAttribute("stroke", "black");
+        line.setAttribute("stroke-width", "2");
+        edgeCanvas.appendChild(line);
+    }else{
+        drawingEdgeStartCords = [nodePos.x, nodePos.y]
+        drawingEdgeStartNode = nodeId
+    }
+    
+    drawingEdge = !drawingEdge
 }
 
 document.addEventListener("keydown", (e) => {
@@ -38,11 +90,10 @@ document.addEventListener("keydown", (e) => {
         if(nodeCreateState){
             //remove create node listener
             mapCanvas.removeEventListener("click", createNewNode)
-            //add create edge listener
-            mapCanvas.addEventListener("click", createNewEdge)
         }else{
             //remove create edge listener
             mapCanvas.removeEventListener("click", createNewEdge)
+            //add create node listener
             mapCanvas.addEventListener("click", createNewNode)
         }
         nodeCreateState = !nodeCreateState
@@ -161,7 +212,3 @@ function pathFinder(start, goal, map_nodes) {
 
     console.log(foundPath);
 }
-
-// Example usage:
-// Assume map_nodes is defined elsewhere
-// pathFinder(19, 2, map_nodes);
