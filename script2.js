@@ -2,19 +2,21 @@ let map_nodes = []
 
 const mapCanvas = document.getElementById("map")
 
-var cursorX;
-var cursorY; 
+let cursorX;
+let cursorY; 
 
 let nodeSize = window.innerHeight * 0.1;
+
+let nodeCreateState = true
 
 mapCanvas.addEventListener("mousemove", (e) => {
   cursorX = e.pageX;
   cursorY = e.pageY;
 });
 
-mapCanvas.addEventListener("click", ()=>{
-    createNewNode()
-})
+
+
+mapCanvas.addEventListener("click", createNewNode)
 
 function createNewNode(){
     const newNode = document.createElement("div")
@@ -27,6 +29,25 @@ function createNewNode(){
 }
 
 
+function createNewEdge(){
+    console.log("creating new edge")
+}
+
+document.addEventListener("keydown", (e) => {
+    if(e.key == "e"){
+        if(nodeCreateState){
+            //remove create node listener
+            mapCanvas.removeEventListener("click", createNewNode)
+            //add create edge listener
+            mapCanvas.addEventListener("click", createNewEdge)
+        }else{
+            //remove create edge listener
+            mapCanvas.removeEventListener("click", createNewEdge)
+            mapCanvas.addEventListener("click", createNewNode)
+        }
+        nodeCreateState = !nodeCreateState
+    }
+});
 
 
 
