@@ -216,15 +216,25 @@ function pathFinder(start, goal, map_nodes) {
             makingPath = false;
         }
     }
-
-    console.log(foundPath);
+    return foundPath
 }
 
 
-document.addEventListener("keydown", (e)=>{
+finderStartBtn = document.getElementById("path-finder-start-btn")
 
-    if(e.key == "s"){ 
-        console.log(map_nodes)
-        pathFinder(1, 15, map_nodes)
-    }
+finderStartBtn.addEventListener("click", ()=>{
+    const startNode = document.getElementById("start-node").value
+    const endNode = document.getElementById("end-node").value
+
+    let path =  pathFinder(parseInt(startNode, 10), parseInt(endNode, 10), map_nodes)
+    path.map((node)=>{
+        let foundPathNode = document.getElementById(`${node}`)
+        foundPathNode.style.backgroundColor = "red"
+    })
+
 })
+
+
+
+
+

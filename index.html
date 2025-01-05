@@ -10,6 +10,26 @@
     <div id="mapCanvas">
         <svg id="edgeCanvas"></svg>
     </div>
+    <div class="map-details">
+        <h1>Map Details</h1>
+        <p>
+            <ul>
+                <li>click on the canvas to create nodes</li>
+                <li>press "e" to change to drawing edges</li>
+                <li>after clicking "e", click on nodes that you want the edges to be drawn between</li>
+                <li>press "e" again if you want to create more nodes</li>
+            </ul>
+        </p>
+        <form action="">
+            <label for="start-node">Start Node: </label>
+            <input type="number" name="" id="start-node">
+            <br><br>
+            <label for="end-node">End Node: </label>
+            <input type="number" name="" id="end-node">
+
+            <button type="button" id="path-finder-start-btn">Start Path finder</button>
+        </form>
+    </div>
     <script src="script2.js"></script>
 </body>
 </html>
