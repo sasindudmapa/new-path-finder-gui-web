@@ -7,28 +7,28 @@
     <title>Document</title>
 </head>
 <body>
-    <div id="mapCanvas">
-        <svg id="edgeCanvas"></svg>
-    </div>
-    <div class="map-details">
-        <h1>Map Details</h1>
-        <p>
+    <div class="container">
+        <div id="mapCanvas">
+            <svg id="edgeCanvas"></svg>
+        </div>
+        <div class="map-details">
+            <h1>Map Details</h1>
             <ul>
-                <li>click on the canvas to create nodes</li>
-                <li>press "e" to change to drawing edges</li>
-                <li>after clicking "e", click on nodes that you want the edges to be drawn between</li>
-                <li>press "e" again if you want to create more nodes</li>
+                <li>Click on the canvas to create nodes</li>
+                <li>Press "E" to switch to drawing edges</li>
+                <li>Click on nodes to draw edges between them</li>
+                <li>Press "E" again to create more nodes</li>
             </ul>
-        </p>
-        <form action="">
-            <label for="start-node">Start Node: </label>
-            <input type="number" name="" id="start-node">
-            <br><br>
-            <label for="end-node">End Node: </label>
-            <input type="number" name="" id="end-node">
+            <form>
+                <label for="start-node">Start Node:</label>
+                <input type="number" id="start-node" placeholder="Enter start node ID">
 
-            <button type="button" id="path-finder-start-btn">Start Path finder</button>
-        </form>
+                <label for="end-node">End Node:</label>
+                <input type="number" id="end-node" placeholder="Enter end node ID">
+
+                <button type="button" id="path-finder-start-btn">Start Path Finder</button>
+            </form>
+        </div>
     </div>
     <script src="script2.js"></script>
 </body>

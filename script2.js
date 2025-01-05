@@ -58,8 +58,11 @@ function createNewNode() {
 
 function createNewEdge(nodeId, nodePos) {
     if (drawingEdge) {
-        // Set the end coordinates and node for the edge
-        drawingEdgeEndCords = [nodePos.x, nodePos.y];
+        // Adjust end coordinates to be relative to the canvas
+        drawingEdgeEndCords = [
+            nodePos.left + nodeSize / 2 - edgeCanvas.getBoundingClientRect().left,
+            nodePos.top + nodeSize / 2 - edgeCanvas.getBoundingClientRect().top,
+        ];
         drawingEdgeEndNode = nodeId;
 
         // Calculate the distance between the start and end nodes
@@ -68,7 +71,7 @@ function createNewEdge(nodeId, nodePos) {
             Math.pow(drawingEdgeStartCords[1] - drawingEdgeEndCords[1], 2)
         );
 
-        // Update node adjacency lists with the edge and its length
+        // Update adjacency lists with the edge and its length
         map_nodes[drawingEdgeStartNode - 1][2].push([parseInt(drawingEdgeEndNode, 10), d]);
         map_nodes[drawingEdgeEndNode - 1][2].push([parseInt(drawingEdgeStartNode, 10), d]);
 
@@ -82,14 +85,18 @@ function createNewEdge(nodeId, nodePos) {
         line.setAttribute("stroke-width", "2");
         edgeCanvas.appendChild(line);
     } else {
-        // Set the start coordinates and node for the edge
-        drawingEdgeStartCords = [nodePos.x, nodePos.y];
+        // Adjust start coordinates to be relative to the canvas
+        drawingEdgeStartCords = [
+            nodePos.left + nodeSize / 2 - edgeCanvas.getBoundingClientRect().left,
+            nodePos.top + nodeSize / 2 - edgeCanvas.getBoundingClientRect().top,
+        ];
         drawingEdgeStartNode = nodeId;
     }
 
     // Toggle the edge drawing state
     drawingEdge = !drawingEdge;
 }
+
 
 // Toggle between node creation and edge creation modes using the 'e' key
 document.addEventListener("keydown", (e) => {
@@ -233,8 +240,3 @@ finderStartBtn.addEventListener("click", ()=>{
     })
 
 })
-
-
-
-
-
