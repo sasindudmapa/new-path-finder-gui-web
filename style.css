@@ -114,3 +114,7 @@ form button:hover {
     justify-content: center;
     align-items: flex-start;
 }
+
+.node-id{
+    position: absolute;
+}

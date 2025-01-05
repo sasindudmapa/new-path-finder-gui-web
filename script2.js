@@ -43,6 +43,18 @@ function createNewNode() {
     newNode.id = `${noOfNodes}`;
     mapCanvas.appendChild(newNode);
 
+
+    // Create a new div for the node's ID
+    const nodeIdElement = document.createElement("div");
+    nodeIdElement.textContent = `${noOfNodes}`;  // Set the text to the node's ID
+    nodeIdElement.classList.add("node-id");  // Add a class for styling
+
+    // Position the nodeIdElement on top of the node
+    nodeIdElement.style.left = `${newNodePosX + nodeSize / 2 - 10}px`;  // Adjust X position slightly
+    nodeIdElement.style.top = `${newNodePosY - 20}px`;  // Position it above the node
+    mapCanvas.appendChild(nodeIdElement);
+
+
     // Track the currently hovered node
     newNode.addEventListener("mouseover", () => {
         currentHoveringNode = newNode.id;
