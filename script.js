@@ -1,73 +1,129 @@
-let map_nodes = [
-    [1,[344,222],[["2",207.8677464158401]],true],
-    [
-        2,
-        [
-            539,
-            150
-        ],
-        [
-            [
-                "1",
-                207.8677464158401
-            ],
-            [
-                "3",
-                137.84411485442533
-            ]
-        ],
-        true
-    ],
-    [
-        3,
-        [
-            654,
-            226
-        ],
-        [
-            [
-                "2",
-                137.84411485442533
-            ]
-        ],
-        false
-    ]
-]
+let map_nodes = []; // Stores information about all nodes
+let noOfNodes = 0; // Tracks the number of nodes
 
-let map_wnodes = [
-    // Urban Center
-    [1, [100, 150], [[2, 50], [3, 70], [4, 80]], false],
-    [2, [150, 170], [[1, 50], [3, 60]], false],
-    [3, [130, 200], [[1, 70], [2, 60], [4, 40]], false],
-    [4, [90, 220], [[1, 80], [3, 40], [5, 300]], false],  // Added connection to 5
-    
-    // Suburban Area
-    [5, [300, 150], [[6, 40], [7, 70], [4, 300]], false],  // Added connection to 4
-    [6, [340, 170], [[5, 40], [8, 80]], false],
-    [7, [320, 130], [[5, 70], [8, 60]], false],
-    [8, [360, 200], [[6, 80], [7, 60], [9, 400]], false],  // Added connection to 9
-    
-    // Rural Towns
-    [9, [700, 300], [[10, 90], [11, 120], [8, 400]], false],  // Added connection to 8
-    [10, [750, 350], [[9, 90], [12, 100]], false],
-    [11, [720, 270], [[9, 120], [12, 70]], false],
-    [12, [760, 250], [[10, 100], [11, 70], [13, 350]], false],  // Added connection to 13
-    
-    // Coastal Area
-    [13, [150, 500], [[14, 60], [15, 100], [12, 350]], false],  // Added connection to 12
-    [14, [200, 520], [[13, 60], [16, 80]], false],
-    [15, [180, 470], [[13, 100], [16, 70]], false],
-    [16, [230, 490], [[14, 80], [15, 70], [17, 500]], false],  // Added connection to 17
-    
-    // Mountainous Region
-    [17, [600, 600], [[18, 80], [19, 90], [16, 500]], false],  // Added connection to 16
-    [18, [580, 650], [[17, 80], [20, 110]], false],
-    [19, [620, 570], [[17, 90], [20, 100]], false],
-    [20, [670, 620], [[18, 110], [19, 100]], false],
-]
+const mapCanvas = document.getElementById("mapCanvas"); // Canvas for creating nodes
+const edgeCanvas = document.getElementById("edgeCanvas"); // Canvas for drawing edges
+
+let cursorX; // Tracks the X-coordinate of the mouse relative to the canvas
+let cursorY; // Tracks the Y-coordinate of the mouse relative to the canvas
+
+let nodeSize = 20; // Size of each node
+
+let nodeCreateState = true; // Determines whether the system is in node creation mode
+let drawingEdge = false; // Tracks whether an edge is being drawn
+let drawingEdgeStartCords = []; // Starting coordinates of the edge
+let drawingEdgeEndCords = []; // Ending coordinates of the edge
+let drawingEdgeStartNode = null; // Start node for the edge
+let drawingEdgeEndNode = null; // End node for the edge
+let currentHoveringNode = null; // Currently hovered node
+
+// Track mouse coordinates relative to the canvas
+mapCanvas.addEventListener("mousemove", (e) => {
+    cursorX = e.pageX - mapCanvas.offsetLeft;
+    cursorY = e.pageY - mapCanvas.offsetTop;
+});
+
+// Create a new node when the canvas is clicked
+mapCanvas.addEventListener("click", createNewNode);
+
+function createNewNode() {
+    // Create a new node element
+    const newNode = document.createElement("div");
+    let newNodePosX = cursorX - nodeSize / 4;
+    let newNodePosY = cursorY - nodeSize / 4;
+
+    noOfNodes++;
+    let newNodeData = [noOfNodes, [newNodePosX, newNodePosY], [], false]; // Node data: [ID, position, edges, visited flag]
+    map_nodes.push(newNodeData);
+
+    // Add the new node to the canvas
+    newNode.style.left = `${newNodePosX}px`;
+    newNode.style.top = `${newNodePosY}px`;
+    newNode.classList.add("node");
+    newNode.id = `${noOfNodes}`;
+    mapCanvas.appendChild(newNode);
 
 
+    // Create a new div for the node's ID
+    const nodeIdElement = document.createElement("div");
+    nodeIdElement.textContent = `${noOfNodes}`;  // Set the text to the node's ID
+    nodeIdElement.classList.add("node-id");  // Add a class for styling
 
+    // Position the nodeIdElement on top of the node
+    nodeIdElement.style.left = `${newNodePosX + nodeSize / 2 - 10}px`;  // Adjust X position slightly
+    nodeIdElement.style.top = `${newNodePosY - 20}px`;  // Position it above the node
+    mapCanvas.appendChild(nodeIdElement);
+
+
+    // Track the currently hovered node
+    newNode.addEventListener("mouseover", () => {
+        currentHoveringNode = newNode.id;
+    });
+
+    // Handle node click for edge creation
+    newNode.addEventListener("click", (e) => {
+        if (!nodeCreateState) {
+            createNewEdge(e.target.id, e.target.getBoundingClientRect());
+        }
+    });
+}
+
+function createNewEdge(nodeId, nodePos) {
+    if (drawingEdge) {
+        // Adjust end coordinates to be relative to the canvas
+        drawingEdgeEndCords = [
+            nodePos.left + nodeSize / 2 - edgeCanvas.getBoundingClientRect().left,
+            nodePos.top + nodeSize / 2 - edgeCanvas.getBoundingClientRect().top,
+        ];
+        drawingEdgeEndNode = nodeId;
+
+        // Calculate the distance between the start and end nodes
+        let d = Math.sqrt(
+            Math.pow(drawingEdgeStartCords[0] - drawingEdgeEndCords[0], 2) +
+            Math.pow(drawingEdgeStartCords[1] - drawingEdgeEndCords[1], 2)
+        );
+
+        // Update adjacency lists with the edge and its length
+        map_nodes[drawingEdgeStartNode - 1][2].push([parseInt(drawingEdgeEndNode, 10), d]);
+        map_nodes[drawingEdgeEndNode - 1][2].push([parseInt(drawingEdgeStartNode, 10), d]);
+
+        // Draw the edge on the edge canvas
+        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", drawingEdgeStartCords[0]);
+        line.setAttribute("y1", drawingEdgeStartCords[1]);
+        line.setAttribute("x2", drawingEdgeEndCords[0]);
+        line.setAttribute("y2", drawingEdgeEndCords[1]);
+        line.setAttribute("stroke", "black");
+        line.setAttribute("stroke-width", "2");
+        edgeCanvas.appendChild(line);
+    } else {
+        // Adjust start coordinates to be relative to the canvas
+        drawingEdgeStartCords = [
+            nodePos.left + nodeSize / 2 - edgeCanvas.getBoundingClientRect().left,
+            nodePos.top + nodeSize / 2 - edgeCanvas.getBoundingClientRect().top,
+        ];
+        drawingEdgeStartNode = nodeId;
+    }
+
+    // Toggle the edge drawing state
+    drawingEdge = !drawingEdge;
+}
+
+
+// Toggle between node creation and edge creation modes using the 'e' key
+document.addEventListener("keydown", (e) => {
+    if (e.key === "e") {
+        if (nodeCreateState) {
+            // Remove node creation event listener
+            mapCanvas.removeEventListener("click", createNewNode);
+        } else {
+            // Add node creation event listener and remove edge creation
+            mapCanvas.removeEventListener("click", createNewEdge);
+            mapCanvas.addEventListener("click", createNewNode);
+        }
+        nodeCreateState = !nodeCreateState;
+    }
+});
 
 
 
@@ -179,11 +235,20 @@ function pathFinder(start, goal, map_nodes) {
             makingPath = false;
         }
     }
-
-    console.log(foundPath);
+    return foundPath
 }
 
-// Example usage:
-// Assume map_nodes is defined elsewhere
-console.log(map_nodes)
-pathFinder(19, 2, map_nodes);
+
+finderStartBtn = document.getElementById("path-finder-start-btn")
+
+finderStartBtn.addEventListener("click", ()=>{
+    const startNode = document.getElementById("start-node").value
+    const endNode = document.getElementById("end-node").value
+
+    let path =  pathFinder(parseInt(startNode, 10), parseInt(endNode, 10), map_nodes)
+    path.map((node)=>{
+        let foundPathNode = document.getElementById(`${node}`)
+        foundPathNode.style.backgroundColor = "red"
+    })
+
+})
