@@ -235,20 +235,37 @@ function pathFinder(start, goal, map_nodes) {
             makingPath = false;
         }
     }
+    console.log(foundPath)
     return foundPath
 }
 
 
 finderStartBtn = document.getElementById("path-finder-start-btn")
+let hasRunFirstTime = false
+let path;
 
 finderStartBtn.addEventListener("click", ()=>{
     const startNode = document.getElementById("start-node").value
     const endNode = document.getElementById("end-node").value
 
-    let path =  pathFinder(parseInt(startNode, 10), parseInt(endNode, 10), map_nodes)
+    if(hasRunFirstTime){
+        path.map((node)=>{
+            let foundPathNode = document.getElementById(`${node}`)
+            foundPathNode.style.backgroundColor = "#3a9f88"
+        })
+    }
+
+
+    path =  pathFinder(parseInt(startNode, 10), parseInt(endNode, 10), map_nodes)
     path.map((node)=>{
         let foundPathNode = document.getElementById(`${node}`)
         foundPathNode.style.backgroundColor = "red"
     })
+
+    map_nodes.map((node)=>{
+        node[3] = false
+    })
+
+    hasRunFirstTime = !hasRunFirstTime
 
 })
